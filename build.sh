@@ -1,5 +1,6 @@
 
-clang_args="-Wno-parentheses -Wshadow -Wno-null-dereference -Wno-format-security -Wno-pragma-pack -fno-caret-diagnostics -fdiagnostics-absolute-paths  -fno-exceptions"
+# -O2
+clang_args=" -Wno-parentheses -Wshadow -Wno-null-dereference -Wno-format-security -Wno-pragma-pack -fno-caret-diagnostics -fdiagnostics-absolute-paths  -fno-exceptions"
 clang_linker="" #clang_linker="-lstdc++ -lubsan"
 game_defs="-DDEBUG"
 

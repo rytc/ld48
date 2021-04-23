@@ -5,4 +5,4 @@
 - GLFW
  
 ## How to build
-- Linux: `./build.sh`
+- Linux: `./build.sh` (Uses clang to compile)
