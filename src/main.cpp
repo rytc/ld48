@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     while(!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLUE);
-        DrawText("Hello world!", 100, 100, 20, WHITE);
+        DrawText("Ludum Dare 48 PREP!", 100, 100, 20, WHITE);
         EndDrawing();
     }
 
