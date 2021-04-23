@@ -5,5 +5,4 @@
 - GLFW
  
 ## How to build
-Linux `./build.sh`
-Windows `./build.bat`
+- Linux: `./build.sh`
