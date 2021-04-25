@@ -31,12 +31,13 @@ static const Dialog_Sequence_Definition d_sequences[] = {
             "Dekard: Good luck down there, hope you have good insurance. Twenty-five levels of fun ahead."
 
         }},
-    {5, {
+    {6, {
             "Dekard: ...",
             "Dekard: What!? You're done?",
             "Dekard: I just received word that the group of mercs I hired are on their way.",
             "Dekard: Well kid, I'm impressed. Thanks for your help.",
-            "Dekard: Hopefully there is a refund policy on that merc contract."
+            "Dekard: Hopefully there is a refund policy on that merc contract.",
+	    "GAME OVER. Thanks for playing!"
         }},
 };
 

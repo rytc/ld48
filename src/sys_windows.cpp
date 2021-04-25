@@ -1,6 +1,5 @@
-
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#define _AMD64_
+#include <memoryapi.h>
 
 static void* 
 sys_alloc_page(u64 *size) {
@@ -10,7 +9,7 @@ sys_alloc_page(u64 *size) {
 
 static void 
 sys_free_page(void* pointer, u64 size) {
-    VirtualFree(pointer, 0, MEM_RELEASE)
+    VirtualFree(pointer, 0, MEM_RELEASE);
 }
 
 
