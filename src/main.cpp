@@ -1,6 +1,7 @@
 #include "common.h"
 #include <cmath>
 #include <cstring> // memset
+#include <raylib.h>
 
 #ifdef PLATFORM_LINUX
 #include "sys_linux.cpp"
@@ -15,7 +16,6 @@ static constexpr f32 TERMINAL_VELOCITY = 4.f;
 static constexpr s32 MAX_PROJECTILE_COUNT = 25;
 static constexpr f32 ANIM_FRAME_RATE = 1.f/8.f;
 
-#include <raylib.h>
 #include "utils.cpp"
 #include "animations.cpp"
 #include "dialogs.cpp"
@@ -86,7 +86,7 @@ struct Projectile {
     Vector2 dir;
     Vector2 pos;
     f32 lifetime;
-    u32 shooter;
+    Entity_ID shooter;
 };
 
 struct Entity {
@@ -109,7 +109,7 @@ struct Entity {
     u8 interact_state;
     Entity_Interact_Proc on_interact;
 
-    Item inventory[4];
+    //Item inventory[4];
     Dialog_Sequence dialog;
 };
 
@@ -254,10 +254,19 @@ add_enemy_entity(Entity_List *entity_list, u32 level, u32 type) {
     entity->phys_state = PHYS_STATE_FALLING;
     entity->last_ground = nullptr;
     entity->color = RED;
-    entity->hp = 100.f;
     entity->sprite = {};
-    entity->sprite.sequence = ROBOT_STAND;
     entity->on_interact = nullptr;
+
+    switch(type) {
+        case 0: {
+            entity->hp = 100.f;
+            entity->sprite.sequence = ROBOT_STAND;
+        } break;
+        case 1: {
+            entity->hp = 25.f;
+            entity->sprite.sequence = FLOAT_BOT_STAND;
+        } break;
+    };
 
     return entity;
 }
@@ -593,6 +602,9 @@ make_zone_1(void) {
         entity = add_building_entity(g_entity_list, DESERT_BUILDING_3);
         entity->pos = {1040, 227};
 
+        entity = add_building_entity(g_entity_list, DESERT_BUILDING_4);
+        entity->pos = {1116, 227};
+
 
         entity = add_npc_entity(g_entity_list);
         entity->pos = {850, 259};
@@ -651,7 +663,7 @@ make_zone_2(void) {
     entity->dialog.id = DIALOG_DEKARD;
     entity->on_interact = dekard_on_interact;
 
-    Vector2 player_spawn = {32, 300-34};
+    Vector2 player_spawn = {2, 300-34};
 
     Entity_ID player_entity_id = add_player_entity(g_entity_list);
     Entity *player_entity = get_entity(g_entity_list, player_entity_id);
@@ -674,8 +686,8 @@ make_dungeon(void) {
 
     // Ground0
     Entity *entity = add_ground_entity(g_entity_list);
-    entity->pos = {-32, 264};
-    entity->collision_rec = {0,0, 32, 128};
+    entity->pos = {-200, 232};
+    entity->collision_rec = {0,0, 200, 196};
 
     // Ground1
     entity = add_ground_entity(g_entity_list);
@@ -684,8 +696,8 @@ make_dungeon(void) {
     
     // Ground2
     entity = add_ground_entity(g_entity_list);
-    entity->pos = {1000, 264};
-    entity->collision_rec = {0,0, 32, 128};
+    entity->pos = {1000, 232};
+    entity->collision_rec = {0,0, 200, 196};
 
     Vector2 player_spawn = {32, 300-34};
 
@@ -700,7 +712,7 @@ make_dungeon(void) {
     // 
     u32 enemy_count = (get_rand(&g_rand_state) % (level * 2)) + 1;
     for(u32 e_idx = 0; e_idx < enemy_count; e_idx++) {
-        entity = add_enemy_entity(g_entity_list, level, 0);
+        entity = add_enemy_entity(g_entity_list, level, get_rand(&g_rand_state) % 2);
         entity->pos = {static_cast<f32>(get_rand(&g_rand_state) % 950), 264};
     }
 
@@ -711,6 +723,54 @@ make_dungeon(void) {
     return player_entity_id;
 
 }
+
+static Entity_ID 
+make_zone_end(void) {
+    init_entity_list(g_entity_list);
+
+    UnloadTexture(t_ground);
+    t_ground = LoadTexture("graphics/indoor_ground.png");
+
+    UnloadTexture(t_bg);
+    t_bg = LoadTexture("graphics/indoor_bg.png");
+
+    // Ground0
+    Entity *entity = add_ground_entity(g_entity_list);
+    entity->pos = {-32, 300-64};
+    entity->collision_rec = {0,0, 32, 128};
+
+    // Ground1
+    entity = add_ground_entity(g_entity_list);
+    entity->pos = {0, 300};
+    entity->collision_rec = {0, 0, 96, 128};
+    
+    // Ground2
+    entity = add_ground_entity(g_entity_list);
+    entity->pos = {96, 300-64};
+    entity->collision_rec = {0,0, 32, 128};
+
+    entity = add_building_entity(g_entity_list, DEKARD_BUILDING);
+    entity->pos = {0, 300-64};
+    entity->collision_rec = {0,0,96,64};
+
+    entity = add_npc_entity(g_entity_list);
+    entity->pos = {60, 268};
+    entity->sprite.sequence = DEKARD;
+    entity->flags = ENTITY_FLAG_INTERACTABLE;
+    entity->phys_state = PHYS_STATE_STATIONARY;
+    entity->dialog.id = DIALOG_DEKARD_END;
+    entity->on_interact = npc_on_interact;
+
+    Vector2 player_spawn = {2, 300-34};
+
+    Entity_ID player_entity_id = add_player_entity(g_entity_list);
+    Entity *player_entity = get_entity(g_entity_list, player_entity_id);
+    player_entity->pos = player_spawn;
+
+    return player_entity_id;
+}
+
+
 
 int main(int argc, char **argv) {
     Allocator mem = make_allocator(MB(256));
@@ -766,6 +826,10 @@ int main(int argc, char **argv) {
             if(g_zone_load == 2) {
                 player_entity_id = make_zone_2();
                 g_current_zone = 2;
+            } else if(g_current_zone >= 27) {
+                g_current_zone += 1;
+                player_entity_id = make_zone_end();
+                
             } else {
                 g_current_zone += 1;
                 player_entity_id = make_dungeon();
@@ -789,9 +853,10 @@ int main(int argc, char **argv) {
 
                 bool collided = false;
                 for(s32 entity_idx = 0; entity_idx < g_entity_list->entity_count; entity_idx++) {
-                    if(projectile->shooter == entity_idx) continue;
                     Entity *entity = &g_entity_list->entities[entity_idx];
-                    
+
+                    if(projectile->shooter == entity->id) continue;
+                                        
                     Rectangle entity_rect = get_bounds(entity);
                     collided = CheckCollisionCircleRec(projectile->pos, 8.f, entity_rect);
                     
@@ -799,16 +864,24 @@ int main(int argc, char **argv) {
                         if((entity->flags & ENTITY_FLAG_INVULNERABLE) == 0) {
                             entity->hp -= 25.f;
                             if(entity->hp <= 0.f) {
-                                remove_entity(g_entity_list, entity->id); // temp
+                                //remove_entity(g_entity_list, entity->id); // temp
+                                entity->flags = entity->flags | (ENTITY_FLAG_INVULNERABLE | ENTITY_FLAG_NO_COLLIDE);
+                                entity->phys_state = PHYS_STATE_STATIONARY;
+                                entity->collision_rec = {0,0,0,0};
+                                if(entity->sprite.sequence == ROBOT_STAND) {
+                                    play_anim(&entity->sprite, ROBOT_BLOWUP);
+                                } else if(entity->sprite.sequence == FLOAT_BOT_STAND) {
+                                    play_anim(&entity->sprite, FLOAT_BOT_BLOWUP);
+                                }
                                 PlaySound(g_sounds[SOUND_EXPLOSION]);
 
                             }
                         }
                         break;
-                    }
+                    } else { collided = false; }
                 }
 
-                if(projectile->lifetime > 0.5f || collided) { 
+                if(projectile->lifetime > 0.15f || collided) { 
                     if(idx != projectile_count - 1) {
                         projectiles[idx] = projectiles[projectile_count - 1];
                         projectile_count--;
@@ -838,7 +911,7 @@ int main(int argc, char **argv) {
                 play_anim(&player_entity->sprite, PLAYER_PUNCH_LEFT);
             }
 
-            if(g_current_zone > 2) {
+            if(g_current_zone > 2 && g_current_zone < 28) {
                 last_mouse_pos = GetMousePosition();
                 Vector2 screen_center = {SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f};
                 last_mouse_pos.x -= screen_center.x;
@@ -849,6 +922,7 @@ int main(int argc, char **argv) {
                     bullet->pos = add_vec2(player_entity->pos, {16.f, 16.f});
                     bullet->dir = normalize(last_mouse_pos); 
                     bullet->lifetime = 0.f;
+                    bullet->shooter = player_entity_id;
                     projectile_count += 1;
                     PlaySound(g_sounds[SOUND_SHOOT]);
                 }
@@ -901,7 +975,7 @@ int main(int argc, char **argv) {
             draw_dialog(player_entity);
         }
       
-        if(g_current_zone > 2) {
+        if(g_current_zone > 2 && g_current_zone < 28) {
             char buf[32];
             snprintf(buf, 32, "LeveL: %u", g_current_zone - 2);
             DrawText(buf, 10, 10, 20, WHITE); 

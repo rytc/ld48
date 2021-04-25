@@ -8,6 +8,7 @@ enum Dialog_Sequence_ID {
     DIALOG_SEQUENCE_0,
     DIALOG_SEQUENCE_2,
     DIALOG_DEKARD,
+    DIALOG_DEKARD_END,
 };
 
 static const Dialog_Sequence_Definition d_sequences[] = {
@@ -27,10 +28,16 @@ static const Dialog_Sequence_Definition d_sequences[] = {
             "Dekard: Well, the ... situation ... is bigger than a one man job.",
             "Dekard: The tunnel system below have been heavily infiltrated.",
             "Dekard: The corpos have been trying to take Depar without making a rukus.",
-            "Dekard: Good luck down there, hope you have good insurance."
+            "Dekard: Good luck down there, hope you have good insurance. Twenty-five levels of fun ahead."
 
         }},
-
+    {5, {
+            "Dekard: ...",
+            "Dekard: What!? You're done?",
+            "Dekard: I just received word that the group of mercs I hired are on their way.",
+            "Dekard: Well kid, I'm impressed. Thanks for your help.",
+            "Dekard: Hopefully there is a refund policy on that merc contract."
+        }},
 };
 
 struct Entity;
