@@ -15,3 +15,4 @@ Assets can be downloaded from the release .zip
 - Need to manually run `vcvarsall.bat` to setup the cmd prompt for VC.
 - Build/tested with MSVC 2019
 
+![Image of Depar](https://github.com/rytc/ld48/blob/main/screenshots/Screenshot%20from%202021-04-25%2019-29-58.png)
